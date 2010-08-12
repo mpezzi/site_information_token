@@ -1,0 +1,66 @@
+<?php
+
+/**
+ * Implementation of hook_token_values().
+ */
+function site_information_token_token_values($type, $object = NULL, $options = array()) {
+  if ( $type == 'global' ) {
+    $nid = '';
+    $title = '';
+    
+    if ( arg(0) == 'node' && is_numeric(arg(1)) ) {
+      if ( $node = node_load(arg(1)) ) {
+        $nid = $node->nid;
+        $title = $node->title;
+      }
+    }
+    
+    return array(
+      'current-node-nid' => $nid,
+      'current-node-title' => $title,
+    );
+  }
+}
+
+/**
+ * Implementation of hook_token_list().
+ */
+function site_information_token_token_list($type = 'all') {
+  return array(
+    'global' => array(
+      'current-node-nid' => t('The current node nid'),
+      'current-node-title' => t('The current node title'),
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_preprocess_page().
+ */
+function site_information_token_preprocess_page(&$vars) {
+  $target = array('site_name', 'site_slogan', 'mission', 'head_title', 'footer_message');
+  
+  foreach ( $vars as $var => $value ) {
+    if ( in_array($var, $target) ) {
+      $vars[$var] = token_replace($vars[$var], 'global');
+    }
+  }
+}
+
+/**
+ * Implementation oh hook_form_alter().
+ */
+function site_information_token_form_alter(&$form, &$form_values, $form_id) {
+  if ( $form['#id'] == 'system-site-information-settings' ) {
+    $form['site_information_token']['token_help'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Replacement patterns'),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+    );
+    
+    $form['site_information_token']['token_help']['help'] = array(
+      '#value' => theme('token_help', 'global'),
+    );
+  }
+}

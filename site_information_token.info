@@ -1,0 +1,7 @@
+; $Id:
+name            = "Site Information Token"
+description     = "Provide tokens to site information values."
+core            = "6.x"
+package         = "Token"
+
+dependencies[]  = token
